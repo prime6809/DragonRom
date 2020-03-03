@@ -7314,13 +7314,14 @@ LAA23   LDA     #$06			; 6x256 bytes pages per graphics page
         SUBD    <AddrStack		; subtract top of cleared space
         BCC     LA9FB			; 'FC' error, no room left
         
-	LDA     <BasCurrentLine		
-	INCA				
-        BEQ     LAA4F			
-        TFR     Y,D
-        SUBD    <BasStartProg
-        ADDD    <BasAddrSigByte
-        STD     <BasAddrSigByte
+	LDA     <BasCurrentLine		; get current basic line
+	INCA				; will be $FFFF in direct mode, so $0000 after inc
+        BEQ     LAA4F			; branch if direct mode
+	
+        TFR     Y,D			; get top of pcleared area
+        SUBD    <BasStartProg		; subtract start of basic
+        ADDD    <BasAddrSigByte		; add current input pointer
+        STD     <BasAddrSigByte		; save new input pointer
 
 LAA4F   LDU     <BasVarSimpleAddr	; get end of basic program
         STX     <BasVarSimpleAddr	; store new end of basic program
@@ -8910,13 +8911,13 @@ LB342   LDX     <EvalCF			; get radius
 LB34F   RTS
 
 
-; MULTIPLY (UNSIGNED) TWO 16 BIT NUMBERS TOGETHER 
-; ENTER WITH ONE NUMBER IN D, THE OTHER IN X
-; THE 4 BYTE PRODUCT WILL BE STORED IN 4,S-7,S
-; (Y, U REG ON THE STACK). 
-; I.E. (AA AB) X (XH XL) = 256*AA*XH+16*(AA*XL+AB*XH)+AB*XL. 
-; THE 2 BYTE  MULTIPLIER AND MULTIPLICAND ARE TREATED AS A 1 BYTE INTEGER PART (MSB) 
-; WITH A 1 BYTE FRACTIONAL PART (LSB)
+; multiply (unsigned) two 16 bit numbers together 
+; enter with one number in d, the other in x
+; the 4 byte product will be stored in 4,s-7,s
+; (y, u reg on the stack). 
+; i.e. (aa ab) x (xh xl) = 256*aa*xh+16*(aa*xl+ab*xh)+ab*xl. 
+; the 2 byte  multiplier and multiplicand are treated as a 1 byte integer part (msb) 
+; with a 1 byte fractional part (lsb)
 LB350   PSHS    D,X,Y,U			; save registers & reserve storage space on stack
         CLR     4,S			; reset overflow flag
         LDA     3,S			; calculate B * XL and store result in 6,S
