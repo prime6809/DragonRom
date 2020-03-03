@@ -4472,7 +4472,7 @@ L9A27   JSR     >L9AB9			; get a keystroke
         CMPA    #$08			; backspace
         BNE     L9A58			; no, skip
 
-; andle backspace	
+; handle backspace	
         CMPX    #BasLinInpBuff+1	; at beginning of buffer
         BEQ     L9A27			; yes: can't delete anymore
 	
@@ -9202,7 +9202,7 @@ LB466   JMP     >BasCmdMode 		; Enter basic command loop
 
 
 ;
-; FIRQ vector, used to aut-start cartrages
+; FIRQ vector, used to auto-start cartrages
 ;
 ;LB469
 FIRQVector   
