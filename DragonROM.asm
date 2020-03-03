@@ -43,6 +43,7 @@
 	use	BasicTokens.asm
 	use	samdefs.asm
 	use	ascii.asm
+	use	cpudefs.asm
 
 ; low RAM defs, not defined in romdefs.asm
 
@@ -677,7 +678,7 @@ L8403   LDU     ,X			; get address of next line in U
         LDX     ,X			; follow link to next line
         BRA     L8403			; continue search
 
-L8410   ORCC    #$01			; flag line no not found
+L8410   ORCC    #FlagCarry		; flag line no not found
 L8412   STX     <Eval47			; save line pointer
 L8414   RTS				; return
 
@@ -776,7 +777,7 @@ L8491   JSR     >TestFPA0			; check status of FPA
 
 BasRun:
 L849F   JSR     VectGetNextCmd 		; call get next command hook
-        ANDCC   #$AF			; enable IRQ,FIRQ
+        ANDCC   #IntsEnable		; enable IRQ,FIRQ
         BSR     BasPollKeyboard 	; scan keyboard
         LDX     <BasAddrSigByte		; get basic input pointer
         STX     <BasDirectTextPtr	; save it
@@ -869,7 +870,7 @@ L8532   JSR     >LB65C			; Close files
         BRA     L853B			
 
 CmdStop:
-L8539   ORCC    #$01                    ; set carry flag
+L8539   ORCC    #FlagCarry              ; set carry flag
 L853B   BNE     L8570			
         LDX     <BasAddrSigByte         ; Save current pos of basic input pointer
         STX     <BasDirectTextPtr
@@ -1342,7 +1343,7 @@ L883D   TFR     X,S			; point S to start of FOR/NEXT data
         LDA     8,S			; get step direction	
         STA     <FP0SGN			; update sign of FPA
         LDX     <BasTempVarDesc		; point X at variable descriptor (from next)
-        JSR     >AddXtoFPA0			; Add (X) to BasVarFPAcc1 (STEP to INDEX)
+        JSR     >AddXtoFPA0		; Add (X) to BasVarFPAcc1 (STEP to INDEX)
         JSR     >L93DE			; pack BasVarFPAcc1 and store in address 
 					; stored in BasTempVarDesc
         LEAX    9,S			; point X to terminal value of FOR loop
@@ -1369,11 +1370,11 @@ L8865   LEAS    $12,S			; pull FOR/NEXT data off stack
 L8872   BSR     VarGetStr 		; Evaluate expression and do a type check for numeric
 
 VarGetExprCC:
-L8874   ANDCC   #$FE			; Clear carry
+L8874   ANDCC   #~FlagCarry		; Clear carry
 
         FCB	Skip2TST		; skip two bytes
 VarGetExpr:	
-L8877   ORCC	#$01			; Set carry
+L8877   ORCC	#FlagCarry		; Set carry
 
 ; string type mode check - if entered at VarGetExpr then valtyp plus is 'TM' error
 ; numeric type mode check - if entered at VarGetExprCC then valtyp minus is 'TM' error
@@ -4577,7 +4578,7 @@ L9AC6   CMPA    #$0D			; enter?
         CMPA    #$20			; space?
         BCS     L9AB9			; nope, get another, character is invalid
 	
-        ORCC    #$01			; set carry
+        ORCC    #FlagCarry		; set carry
 L9AD8   RTS
 
 ; Basic TRON
@@ -9002,7 +9003,7 @@ LF3C2   STA     ,X+			; save an RTS, increment pointer
         
         JSR     >TextCls                ; clear screen
         JSR     >BasEraseVars		; erase basic variables
-        ANDCC   #$AF                    ; Enable interrupts
+        ANDCC   #IntsEnable             ; Enable interrupts
         LDX     #BasSignonMess-1        ; print signon message
         JSR     >TextOutString
         
@@ -9022,7 +9023,7 @@ LF3E1   CLR     <SndTimerPlay		; clear play timer
         STA     >PIA0CRB		; save it back to PIA0
         CLR     <TextDevN		; reset device no to screen
         JSR     >BasResetStack		; reset basic
-        ANDCC   #$AF			; enable inturrupts
+        ANDCC   #IntsEnable		; enable inturrupts
         JMP     >BasCmdMode		; go to basic command mode
 
 ; default FIRO handler D64 ram
@@ -9175,7 +9176,7 @@ LB422   STU     ,X++			; Store address
 	CMPX    CartBase
         LBEQ    CartEntryDOS		; yes, found, jump to Dos init
 	
-        ANDCC   #$AF			; Enable IRQ and FIRQ
+        ANDCC   #IntsEnable		; Enable IRQ and FIRQ
 	
         LDX     #BasSignonMess-1 	; Display basic signon message
         JSR     >TextOutString 
@@ -9196,7 +9197,7 @@ LB44F   NOP				; NOP, all warmstart routines must start with NOP.
         
 	CLR     <TextDevN		; Set device no back to screen/keyboard
         JSR     >BasResetStack 		; Reset basic stack
-        ANDCC   #$AF			; Enable interrupts
+        ANDCC   #IntsEnable		; Enable interrupts
 	
         JSR     >TextCls 		; clear screen
 LB466   JMP     >BasCmdMode 		; Enter basic command loop
@@ -9445,7 +9446,7 @@ LB5EE   DECB				; decrement character counter
         BRA     LB5EE			; loop until at beginning of buffer
 
 LB5F8   CMPA    #$03			; break key
-        ORCC    #$01			; flag break pressed
+        ORCC    #FlagCarry		; flag break pressed
         BEQ     LB603			; yes exit, CC.Z=1
 	
 LB5FE   CMPA    #CR			; enter key?
@@ -10040,7 +10041,7 @@ LB938   JSR     >BasicCassOff 		; turn off tape
         RTS
 
 CasBlockIn:
-LB93E   ORCC    #$50			; disable inturrupts
+LB93E   ORCC    #IntsDisable		; disable inturrupts
         BSR     LB925
         LDX     <CasIOBuffAddr		; point to io address
         CLRA
@@ -10105,7 +10106,7 @@ LB996   JMP     >BasicCassOff 		; turn motor off
 ; block number in CasBlockType
 
 CasBlockOut:
-LB999   ORCC    #$50			; disable interrupts
+LB999   ORCC    #IntsDisable		; disable interrupts
         LDB     <CasBlockLen		; get block length
         STB     <CasIOErrorCode		; use error code as temp byte count
         LDA     <CasBlockLen		; get block length (included in checksum)
@@ -11050,7 +11051,7 @@ CasMotorOff:
 LBDDC   LDA     PIA1CRA			; get PIA control register
         ANDA    #$F7			; mask off bit 3
         STA     PIA1CRA			; save it back to PIA
-        ANDCC   #$AF
+        ANDCC   #IntsEnable
         RTS
 
 ; look for the sync bytes 
@@ -11058,7 +11059,7 @@ LBDDC   LDA     PIA1CRA			; get PIA control register
 ; A = $00 if sync'ed on hi - lo transition of the input signal from the cassette.
 ; A = $a0 if sync'ed on lo - hi transition of the input signal from the cassette.
 CasReadLeader:
-LBDE7   ORCC    #$50			; disable interrupts
+LBDE7   ORCC    #IntsDisable		; disable interrupts
         BSR     CasMotorOn 		; turn the cassete motor on, and wait for it to reach speed
         CLR     <CasBitCount		; clear bit counter
 	
@@ -11136,7 +11137,7 @@ EndTapeSineTab
 
 ; write leader to tape, a block of CasLeadCount leader bytes of $55
 LBE68   PSHS    B,Y			; save regs
-        ORCC    #$50			; disable interrupts
+        ORCC    #IntsDisable		; disable interrupts
         LBSR    CasMotorOn 		; turn cassette motor on
 	
         LDA     #SyncByte		; load SyncByte ($55)
@@ -11154,7 +11155,7 @@ LBE73   BSR     CasByteOut 		; write a byte
 ; Asserts DTR, waits for data then clears DTR.
 DoSerialIn   
 	PSHS    CC,B			; save registers
-        ORCC    #$50			; disable interrrupts
+        ORCC    #IntsDisable		; disable interrrupts
         LDA     #AciaSRxFull		; check for receiver register full (below)
         
 	LDB     AciaCmd			; get command register
@@ -11192,7 +11193,7 @@ DoSetBaud
         ANDB    #~AciaBrdMask		; mask out baud rate bits
         ORB     ,X			; merge with rate from table
         STB     TextSerBaudRate 	; set the baud rate	
-        ANDCC   #$FE			; reenable interrupts
+        ANDCC   #~FlagCarry		; clear carry
         BRA     LBEBD			; return
 	
 LBEBC   COMB				; flag error
@@ -11316,7 +11317,7 @@ ROMOffset	EQU	$4000		; offset between ROM and RAM copy of ROM
 
 DoBoot64
 	NOP				; First byte of reset routine must be NOP....
-	ORCC    #$50			; disable interrupts
+	ORCC    #IntsDisable		; disable interrupts
         LDX     #LBF5A			; point to routine below (source)
         LDU     #CasIOBuff 		; point to cassette buffer (destination)
         LDB     #(D64BootEnd-LBF5A)	; length to copy
