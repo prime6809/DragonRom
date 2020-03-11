@@ -969,7 +969,7 @@ L85D7   JSR     <BasChrGetCurr		; get current input char
 BasSkipLineNo:
         LDX     <BasStartProg		; otherwise start from begiining of program
 L85E9   JSR     >L8403			; go find line number
-        BCS     BasULError			; undefined line number
+        BCS     BasULError		; undefined line number
 BasSetProgPtrX:
 L85EE   LEAX    -1,X			; move to just before start of line
         STX     <BasAddrSigByte		; set basic pointer to destination line
@@ -1084,7 +1084,7 @@ L8690   JSR     <BasChrGet		; get a character from basic
 					; outside range of count of list of line numbers
 
 BasGetLineNo:
-L869A   LDX     <Misc16BitScratch	; default line no of zero	
+L869A   LDX     <DBZero	; default line no of zero	
         STX     BasTempLine
 	
 L869E   BCC     L8704			; return if not numeric 
@@ -1324,7 +1324,7 @@ MessExtraIgnored
 ; NEXT command
 CmdNext:
 L8829   BNE     L882F			; branch if argument given
-        LDX     <Misc16BitScratch	; X = 0, no argument
+        LDX     <DBZero	; X = 0, no argument
         BRA     L8832			
 
 
@@ -1505,7 +1505,7 @@ L891B   LDB     <FP0EXP			; get FPA0 into regs
         JMP     ,Y			; jump to return address
 
 ; branch here if non-operator character found - usually `)` or end of line
-L8925   LDX     <Misc16BitScratch	; point X at dummy value (0)
+L8925   LDX     <DBZero	; point X at dummy value (0)
         LDA     ,S+			; get presidence flag from stack
         BEQ     L8951			; branch if end of expression
 	
@@ -1819,7 +1819,7 @@ CheckAAlpha
 L8AE7   RTS
 
 ; put a new variable in the table of variables.
-L8AE8   LDX     #Misc16BitScratch 	; point X to zero location
+L8AE8   LDX     #DBZero 	; point X to zero location
         LDU     ,S			; get current return addresss
         CMPU    #D89C4			; did we come from 'evaluate alpha expression' ?
         BEQ     L8B1B			; yes return a zero value
@@ -3501,7 +3501,7 @@ L9427   STB     <FPA0			; save B in FPA0
 L942D   LDA     <FPA0			; get MSB of mantissa
         SUBA    #$80			; set carry if +ve mantissa
 L9431   STB     <FP0EXP			; save exponent
-        LDD     <Misc16BitScratch	; zero out bottom half of mantissa
+        LDD     <DBZero	; zero out bottom half of mantissa
         STD     <FPA0+2
         STA     <FPSByte
         STA     <FP0SGN
@@ -3616,7 +3616,7 @@ L94B4   STB     <FPA0			; load mantissa with contents of B
 L94BC   RTS
 
 ; convert ASCII string to FP
-L94BD   LDX     <Misc16BitScratch	; X = 0
+L94BD   LDX     <DBZero	; X = 0
         STX     <FP0SGN			; zero out FPA0 & sign flag
         STX     <FP0EXP
         STX     <FPA0+1
@@ -4275,7 +4275,7 @@ InitSndGraph
         STA     <SndNoteLen		; set initial note length (4)
         CLR     <SndDotNoteScale	; clear note timer scale factor
 	
-        LDD     <Misc16BitScratch	; D=0
+        LDD     <DBZero	; D=0
         STD     <GrDrawAngle		; zero draw scale and angle
         LDB     #$80			; initialize grapics X pos to 128
         STD     <GrCurrXCo
@@ -4301,7 +4301,7 @@ L9900   JSR     <BasChrGet		; skip over the "M"
 					; because addresses still on stack!
 CasWriteBin:
 L991B   LDA     #FtMachineCode		; Set file type as binary
-        LDX     <Misc16BitScratch	; X=0, file mode and ASCII flag	
+        LDX     <DBZero	; X=0, file mode and ASCII flag	
         JSR     >CasWriteHeader		; write header block
 	
         CLR     <CasStatus		; close tape files 
@@ -5577,7 +5577,7 @@ CmdCloadMEntry
 LA0A9   SUBD    #$0200                  ; check for binary (msb) and non-ascii (lsb)
         BNE     LA08B                   ; non zero so error
         
-        LDX     <Misc16BitScratch       ; Zero X reg, default offset
+        LDX     <DBZero       ; Zero X reg, default offset
         JSR     <BasChrGetCurr          ; get next character
         BEQ     LA0BA                   ; nothing, so no offset addr
         
@@ -5628,7 +5628,7 @@ LA0F4   BSR     LA115
         PSHS    D
         INCA
         BEQ     LA101
-        LDU     <Misc16BitScratch	; zero
+        LDU     <DBZero	; zero
         BSR     LA108
         PULS    D,PC			; restore and return
 
@@ -7669,7 +7669,7 @@ LAC4C   PULS    A,U			; restore pixel mask and horizontal difference
         JSR     >LA67B			; move screen pos and pixel mask one to the right, 2 colour mode
         
 	LEAU    -1,U			; decrement horizontal difference
-        CMPU    <Misc16BitScratch	; is difference zero?
+        CMPU    <DBZero	; is difference zero?
         BNE     LAC12			; nope loop again
         
 	LDX     1,S			; get screen pos from stack
@@ -7894,7 +7894,7 @@ LAD7A   JSR     >LAD61			; paint starting at GrCurrX
 LAD83   LDY     #IncGrCurrX		; point to increment X routine
         JSR     ,Y			; call icrement/decrement X
 	
-LAD89   LDU     <Misc16BitScratch	; U=0, initial pixel counter
+LAD89   LDU     <DBZero	; U=0, initial pixel counter
         LDX     <GrCurrX		; get current X co-ordinate
 	
 LAD8D   BMI     LADA6			; branch if X < 0 or X > 127
@@ -7916,7 +7916,7 @@ LAD8D   BMI     LADA6			; branch if X < 0 or X > 127
 LADA4   PULS    Y,U			; restore paint counter, inc/dec counter
 LADA6   TFR     U,D			; save paint counter in D
         TFR     D,X			; save paint counter in X
-        SUBD    <Misc16BitScratch	; D-D-0, set flags according to paint counter 			
+        SUBD    <DBZero	; D-D-0, set flags according to paint counter 			
         RTS
 
 ; Check for border color 
@@ -7932,7 +7932,7 @@ LADAD   JSR     [EvalD9]		; call routine to get address & mask
 
 ; Basic PLAY
 CmdPlay:
-LADBD   LDX     <Misc16BitScratch	; X=0, default values for length of play and address	
+LADBD   LDX     <DBZero	; X=0, default values for length of play and address	
         LDB     #$01			; of start of play string
         PSHS    B,X			; save them on stack
         
@@ -8388,7 +8388,7 @@ Octave3DelayTab
 
 ; basic DRAW command.
 GrDraw:
-LB051   LDX     <Misc16BitScratch	; X=1		
+LB051   LDX     <DBZero	; X=1		
         LDB     #$01			; B=1, End of draw command line values
         
 	PSHS    B,X			; save on stack
@@ -8533,7 +8533,7 @@ LB116
 
 ; go right
 LB11D   CLRA				; clear MSB of horizontal difference
-LB11E   LDX     <Misc16BitScratch	; set vertical difference = 0
+LB11E   LDX     <DBZero	; set vertical difference = 0
         BRA     LB166			; move & draw
 
 ; go left
@@ -8549,7 +8549,7 @@ LB127   CLRA				; clear MSB of horizontal difference
 LB12A   CLRA				; clear MSB of horizontal difference
         BSR     LB15F			; negate difference
 	
-LB12D   LDX     <Misc16BitScratch	; X=0 , horizontal difference = 0	
+LB12D   LDX     <DBZero	; X=0 , horizontal difference = 0	
         EXG     X,D			; exchange horizontal and vertical differences
         BRA     LB166			; move & draw
 
@@ -8616,14 +8616,14 @@ LB177   TST     ,S			; check draw angle
 
 		
 LB183   PULS    Y			; pull angle and scale back of stack
-        LDU     <Misc16BitScratch	; U=0, default horizontal end position = 0
+        LDU     <DBZero	; U=0, default horizontal end position = 0
         ADDD    <GrCurrXCo		; add difference to current X co-ordinate
         BMI     LB18D			; set X co-ordinate to 0 if -ve
 	
         TFR     D,U			; save X co-ordinate in U
 	
 LB18D   TFR     X,D			; get vertical difference
-        LDX     <Misc16BitScratch	; X=0, default vertical end position = 0
+        LDX     <DBZero	; X=0, default vertical end position = 0
         ADDD    <GrCurrYCo		; add current Y co-ordinate to vertical difference
         BMI     LB197			; if Y is -ve set it to 0
 	
@@ -9037,7 +9037,7 @@ LF3FD	JSR	>Delay			; delay 65536 counts of X
 LF400   CLR     <WarmStartFlag		; clear warm start flag, cold start next time
         JMP     >CartEntryFIRQ		; go enter the cartridge at $C000
 
-Delay	LDX	<Misc16BitScratch	; X=0
+Delay	LDX	<DBZero	; X=0
 LF407	LEAX	-1,X			; loops 65536 times
 	BNE	LF407			
 	RTS
@@ -9221,7 +9221,7 @@ DoCartBoot
 	CLR     <WarmStartFlag		; Mark always cold start
         JMP     CartEntryFIRQ		; Jump to cart
 
-LB480   LDX     <Misc16BitScratch	; zero x
+LB480   LDX     <DBZero	; zero x
 LB482   LEAX    -1,X			; Decrement X
         BNE     LB482			; loop again if not zero
         RTS
@@ -9568,7 +9568,7 @@ CmdCsave
 ; save a program to tape in tokenized form
 CasWriteBasic:
 LB6A5   CLRA				; file type 0
-        LDX     <Misc16BitScratch	; zero out ascci flag and mode
+        LDX     <DBZero	; zero out ascci flag and mode
         JSR     >CasWriteHeader		; write out header block
 	
         CLR     <CasStatus		; force close files
@@ -9651,7 +9651,7 @@ LB716   STX     <CasIOBuffAddr		; set it
 LB736   JSR     >BasNew 		; do a new	
 LB739   JMP     >BasIOError		; generate IO error	
 
-LB73C   LDX     <Misc16BitScratch	; X=0	
+LB73C   LDX     <DBZero	; X=0	
         JSR     <BasChrGetCurr		; get next character from basic 
         BEQ     CasReadBin 		; no character just read it
         JSR     >VarCKComma 		; syntax check for comma

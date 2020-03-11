@@ -480,6 +480,8 @@ CasMotorOff		EQU	$BDDC		Turn off cassette motor
 CasReadLeader		EQU	$BDE7		Turn on motor and read past leader
 CasByteOut		EQU	$BE12		Write byte in A register to cassete
 			ENDC
+
+DBZero		EQU	Misc16BitScratch ; this is always set to Zero.
 			
 TextSerBaudRate	EQU	$FF07		Serial baud rate, note on Dragon 64, this is the actual hardware baud rate reg.
 
