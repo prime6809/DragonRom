@@ -10024,12 +10024,12 @@ LB91F   STA     <CasIOErrorCode		; save cassette io code
         LEAS    2,S			; drop return address from stack
         BRA     LB938			; turn off motor, and return
 
-LB925   LDA     TextScreenBase			; Get char from top LSH of screen
+LB925   LDA     TextScreenBase		; Get char from top LSH of screen
         EORA    #$40			; Invert it
 LB92A   LDB     <BasCurrentLine		; get count
         INCB				; increment	
         BNE     LB932			; only save flopped byte back if count=0
-        STA     TextScreenBase			; save inverted byte
+        STA     TextScreenBase		; save inverted byte
 LB932   RTS
 
 CasReadBlock1:
@@ -10220,7 +10220,7 @@ LBA24   BHI     LBA97			; generate FC error if too big
 	
 GrCalcPixelPos:
 LBA28   LSRB				; divide Y co-ordinate by 2 to get character cell
-        LDA     #TextCharsLine		; 32 character per row
+        LDA     #TextScreenRows		; 32 character per row
         MUL				; multiply to get row offset into display
         
 	LDX     #TextScreenBase		; point X at base of text screen
@@ -10794,7 +10794,7 @@ TextClearLine:
 LBCA0   LDA     #$60			; vdg space
         STA     ,X+			; save it in screen memory
         TFR     X,D			; get X into D
-        ANDB    #TextCharsLine-1	; mask out all but column
+        ANDB    #TextScreenRows-1	; mask out all but column
         BNE     TextClearLine 		; keep going if column <> 0
         RTS
 
@@ -10839,9 +10839,9 @@ LBCDB   STX     <TextVDUCursAddr	; save cursor address
         BLS     LBCF3			; no, don't scroll
 	
         LDX     #TextScreenBase		; point X at the beginning of the screen RAM
-LBCE5   LDD     $20,X			; get 2 bytes from next line down
+LBCE5   LDD     TextScreenCols,X	; get 2 bytes from next line down
         STD     ,X++			; save them in this line
-        CMPX    #$05E0			; on the last line?
+	CMPX	#TextScreenLastRow	; on the last line?	
         BCS     LBCE5			; no keep copying
 	
         STX     <TextVDUCursAddr	; update the cursor address	

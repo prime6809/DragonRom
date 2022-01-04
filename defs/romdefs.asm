@@ -573,8 +573,12 @@ BasStartPage	equ 	$1E		; default start page for basic program $1E00
 
 TextScreenBase	equ 	$0400		; base of text screen
 GrScreenBase	equ 	$0600		; base of graphics pages
-TextScreenLen	equ 	$0200		; Length of text screen
+TextScreenCols	equ	32		; Text screen columns
+TextScreenRows	equ	16		; Text screen rows
+TextScreenLen	equ 	(TextScreenCols*TextScreenRows)		; Length of text screen
+TextScreenLen1	equ 	(TextScreenCols*(TextScreenRows-1))	; Length of text screen - 1 row
 TextScreenLast	equ 	(TextScreenBase+TextScreenLen)-1	; last character of text screen
+TextScreenLastRow	equ	(TextScreenBase+TextScreenLen1)		; beginning of last row
 
 ;
 ; Lo-res colour masks
@@ -607,10 +611,10 @@ MaskLRG		equ	$80		; low res graphics
 ; Lo-res (semigraphics) and text screen metrics.
 ;
 
-LoMaxX		equ 	63		; Maximum lo-res X co-ordinate
-LoMaxY		equ 	31		; Maximum lo-res Y co-ordinate
+LoMaxX		equ 	(TextScreenCols*2)-1	; Maximum lo-res X co-ordinate
+LoMaxY		equ 	(TextScreenRows*2)-1	; Maximum lo-res Y co-ordinate
 LoMaxColour	equ 	8		; max lo-res colour
-TextCharsLine	equ 	32		; Text/Lo-res character cells per line
+TextCharsLine	equ 	TextScreenRows	; Text/Lo-res character cells per line
 
 ;
 ; Cartridge entry points
