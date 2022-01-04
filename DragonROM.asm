@@ -10220,7 +10220,7 @@ LBA24   BHI     LBA97			; generate FC error if too big
 	
 GrCalcPixelPos:
 LBA28   LSRB				; divide Y co-ordinate by 2 to get character cell
-        LDA     #TextScreenRows		; 32 character per row
+        LDA     #TextScreenCols		; 32 character per row
         MUL				; multiply to get row offset into display
         
 	LDX     #TextScreenBase		; point X at base of text screen
@@ -10794,7 +10794,7 @@ TextClearLine:
 LBCA0   LDA     #$60			; vdg space
         STA     ,X+			; save it in screen memory
         TFR     X,D			; get X into D
-        ANDB    #TextScreenRows-1	; mask out all but column
+        ANDB    #TextScreenCols-1	; mask out all but column
         BNE     TextClearLine 		; keep going if column <> 0
         RTS
 
